@@ -326,7 +326,7 @@ pub enum Log {
     SecurityLog,
 }
 
-#[derive(AsRefStr, Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Default)]
+#[derive(EnumString, AsRefStr, Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Default)]
 pub enum Measurand {
     ///Instantaneous current flow from EV    
     #[strum(serialize = "Current.Export")]
@@ -433,7 +433,7 @@ pub enum MessageTrigger {
     StatusNotification,
 }
 
-#[derive(AsRefStr, Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Default)]
+#[derive(EnumString, AsRefStr, Debug, PartialEq, Eq, Serialize, Deserialize, Clone, Default)]
 pub enum Phase {
     #[default]
     L1,
