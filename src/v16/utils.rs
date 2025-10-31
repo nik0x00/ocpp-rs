@@ -4,11 +4,9 @@ use super::data_types::DateTimeWrapper;
 // Serializer for serde that forces to be in the format of ISO8601
 pub(crate) mod iso8601_date_time {
     use alloc::{format, string::String};
-    use chrono::{DateTime, Utc, NaiveDateTime};
+    use chrono::DateTime;
     use serde::{self, Deserialize, Serializer, Deserializer};
     use super::DateTimeWrapper;
-
-    static FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
 
     pub fn serialize<S>(
         date: &DateTimeWrapper,
@@ -17,7 +15,7 @@ pub(crate) mod iso8601_date_time {
     where
         S: Serializer,
     {
-        let s = format!("{}", date.inner().format(FORMAT));
+        let s = format!("{}", date.inner().format("%+"));
         serializer.serialize_str(&s)
     }
 
@@ -28,18 +26,16 @@ pub(crate) mod iso8601_date_time {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let dt = NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
-        Ok(DateTimeWrapper::new(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc)))
+        let dt = DateTime::parse_from_rfc3339(&s).map_err(serde::de::Error::custom)?;
+        Ok(DateTimeWrapper::new(dt.to_utc()))
     }
 }
 
 pub(crate) mod iso8601_date_time_optional {
     use alloc::{format, string::String};
-    use chrono::{DateTime, Utc, NaiveDateTime};
+    use chrono::DateTime;
     use serde::{self, Deserialize, Serializer, Deserializer};
     use super::DateTimeWrapper;
-
-    static FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.3fZ";
     
     #[allow(clippy::ref_option)]
     pub fn serialize<S>(
@@ -51,7 +47,7 @@ pub(crate) mod iso8601_date_time_optional {
     {
         match date {
             Some(date) => {
-                let s = format!("{}", date.inner().format(FORMAT));
+                let s = format!("{}", date.inner().format("%+"));
                 serializer.serialize_str(&s)
             },
             None => serializer.serialize_none(),
@@ -67,8 +63,8 @@ pub(crate) mod iso8601_date_time_optional {
         let opt: Option<String> = Option::deserialize(deserializer)?;
         match opt {
             Some(s) => {
-                let dt = NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
-                Ok(Some(DateTimeWrapper::new(DateTime::<Utc>::from_naive_utc_and_offset(dt, Utc))))
+                let dt = DateTime::parse_from_rfc3339(&s).map_err(serde::de::Error::custom)?;
+                Ok(Some(DateTimeWrapper::new(dt.to_utc())))
             },
             None => Ok(None),
         }       
