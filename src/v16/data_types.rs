@@ -11,18 +11,27 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone, Default, Copy)]
-pub struct DateTimeWrapper(DateTime<Utc>);
+pub struct DateTimeWrapper {
+    pub dt: DateTime<Utc>,
+    pub tz_as_numbers: bool,
+}
 
 impl DateTimeWrapper {
+    /// if `tz_as_numbers` is `true`, timezone will be printed as +00:00,
+    /// otherwise as `Z`
     #[must_use]
-    pub const fn new(dt: DateTime<Utc>) -> Self {
-        Self(dt)
+    pub const fn new(dt: DateTime<Utc>, tz_as_numbers: bool) -> Self {
+        Self { dt, tz_as_numbers }
     }
 
     #[must_use]
     pub const fn inner(&self) -> DateTime<Utc> {
-        self.0
+        self.dt
     }    
+
+    pub const fn should_have_z(&self) -> bool {
+        !self.tz_as_numbers
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone, Default)]
